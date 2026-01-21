@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { ArrowDownUpIcon, Plus } from "lucide-react";
 import { Header } from "@/components/portfolio/header";
 import { TechFilter } from "@/components/portfolio/tech-filter";
 import { ProjectCard } from "@/components/portfolio/project-card";
@@ -12,6 +12,7 @@ import {
   projects as initialProjects,
   type Project,
 } from "@/lib/data";
+import { Arrow } from "@radix-ui/react-dropdown-menu";
 
 export default function HomePage() {
   const [projectsList, setProjectsList] = useState<Project[]>(initialProjects);
@@ -98,6 +99,7 @@ export default function HomePage() {
                 title="Cycle sort: default → asc → desc"
                 className="inline-flex items-center gap-2 rounded-lg border border-input bg-card px-3 py-2 text-sm"
               >
+                <ArrowDownUpIcon className="h-4 w-4" />
                 {sortOrder === "default" && <span>Sort: Default</span>}
                 {sortOrder === "asc" && <span>Sort: Title ↑</span>}
                 {sortOrder === "desc" && <span>Sort: Title ↓</span>}
