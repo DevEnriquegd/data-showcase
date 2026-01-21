@@ -1,0 +1,68 @@
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# caches
+.cache/
+.parcel-cache/
+.sass-cache/
+.next/cache/
+.eslintcache
+
+# test / coverage
+/coverage/
+coverage-final.json
+
+# build outputs
+/dist/
+
+# logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local envs and secrets (keep examples)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# lockfiles (leave package lock committed normally; ignore pnpm store)
+.pnpm-store/
