@@ -1,72 +1,110 @@
-"use client"
+"use client";
 
-import { useEffect, useCallback } from "react"
-import Image from "next/image"
-import { X, ExternalLink, Target, Lightbulb, TrendingUp, Layers, Code, GitBranch } from "lucide-react"
-import type { Project, Technology } from "@/lib/data"
-import { getProjectTechnologies } from "@/lib/data"
+import { useEffect, useCallback, useState } from "react";
+import Image from "next/image";
+import {
+  X,
+  ExternalLink,
+  Target,
+  Lightbulb,
+  TrendingUp,
+  Layers,
+  Code,
+  GitBranch,
+  Edit,
+  Check,
+} from "lucide-react";
+import type { Project, Technology } from "@/lib/data";
+import {
+  getProjectTechnologies,
+  technologies as allTechnologies,
+} from "@/lib/data";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ProjectModalProps {
-  project: Project | null
-  onClose: () => void
+  project: Project | null;
+  onClose: () => void;
+  onSave?: (updated: Project) => void;
 }
 
-export function ProjectModal({ project, onClose }: ProjectModalProps) {
+export function ProjectModal({ project, onClose, onSave }: ProjectModalProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState<Project | null>(project);
+
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose()
-      }
+      if (e.key === "Escape") onClose();
     },
-    [onClose]
-  )
+    [onClose],
+  );
 
   useEffect(() => {
     if (project) {
-      document.body.style.overflow = "hidden"
-      document.addEventListener("keydown", handleEscape)
+      setForm(project);
+      setIsEditing(false);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", handleEscape);
     }
     return () => {
-      document.body.style.overflow = "unset"
-      document.removeEventListener("keydown", handleEscape)
-    }
-  }, [project, handleEscape])
+      document.body.style.overflow = "unset";
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [project, handleEscape]);
 
-  if (!project) return null
+  if (!project || !form) return null;
 
-  const projectTechs = getProjectTechnologies(project)
+  const handleSave = () => {
+    if (onSave) onSave(form);
+    setIsEditing(false);
+  };
+
+  const toggleTech = (id: string) => {
+    setForm((f) =>
+      f
+        ? {
+            ...f,
+            technologies: f.technologies.includes(id)
+              ? f.technologies.filter((t) => t !== id)
+              : [...f.technologies, id],
+          }
+        : f,
+    );
+  };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
     >
       <div
         className="relative max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-xl bg-card shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* HEADER SECTION */}
         <div className="relative flex items-start gap-4 border-b border-border p-6">
           <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-muted">
             <Image
-              src={project.image || "/placeholder.svg"}
-              alt={project.title}
+              src={form.image || "/placeholder.svg"}
+              alt={form.title}
               fill
               className="object-cover"
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h2
-              id="modal-title"
-              className="text-xl font-semibold text-foreground"
-            >
-              {project.title}
-            </h2>
+            {isEditing ? (
+              <Input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="text-xl font-semibold"
+              />
+            ) : (
+              <h2 className="text-xl font-semibold text-foreground">
+                {project.title}
+              </h2>
+            )}
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {projectTechs.slice(0, 4).map((tech: Technology) => (
+              {getProjectTechnologies(form).map((tech) => (
                 <span
                   key={tech.id}
                   className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
@@ -78,111 +116,206 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                   {tech.name}
                 </span>
               ))}
-              {projectTechs.length > 4 && (
-                <span className="text-xs text-[#94A3B8]">+{projectTechs.length - 4} more</span>
-              )}
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Close modal"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
+                >
+                  <Check className="h-4 w-4" /> Save
+                </button>
+                <button
+                  onClick={() => {
+                    setForm(project);
+                    setIsEditing(false);
+                  }}
+                  className="inline-flex items-center gap-2 rounded-lg border border-input px-3 py-1 text-sm"
+                >
+                  <X className="h-4 w-4" /> Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-input px-3 py-1 text-sm"
+                >
+                  <Edit className="h-4 w-4" /> Edit
+                </button>
+                <button
+                  onClick={onClose}
+                  className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-muted text-muted-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="max-h-[60vh] overflow-y-auto p-6">
-          <div className="space-y-5">
-            {/* GitHub Button */}
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <ExternalLink className="h-4 w-4" />
-              View on GitHub
-            </a>
-
-            {/* Business Vision */}
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                <Target className="h-5 w-5 text-primary" />
-                Business Vision
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-lg border border-border bg-muted/50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[#475569]">
-                    <Lightbulb className="h-4 w-4" />
-                    Problem
-                  </div>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {project.businessVision.problem}
-                  </p>
+        {/* CONTENT AREA */}
+        <div className="max-h-[65vh] overflow-y-auto p-6 space-y-8">
+          {/* GITHUB & IMAGE URLS */}
+          <section className="space-y-4">
+            {isEditing ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted-foreground uppercase">
+                    Image URL
+                  </label>
+                  <Input
+                    value={form.image}
+                    onChange={(e) =>
+                      setForm({ ...form, image: e.target.value })
+                    }
+                  />
                 </div>
-                <div className="rounded-lg border border-border bg-muted/50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[#475569]">
-                    <Target className="h-4 w-4" />
-                    Decision
-                  </div>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {project.businessVision.decision}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border bg-muted/50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[#475569]">
-                    <TrendingUp className="h-4 w-4" />
-                    Impact
-                  </div>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {project.businessVision.impact}
-                  </p>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted-foreground uppercase">
+                    GitHub Repository URL
+                  </label>
+                  <Input
+                    value={form.githubUrl}
+                    onChange={(e) =>
+                      setForm({ ...form, githubUrl: e.target.value })
+                    }
+                  />
                 </div>
               </div>
-            </div>
+            ) : (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <ExternalLink className="h-4 w-4" /> View on GitHub
+              </a>
+            )}
+          </section>
 
-            {/* Technical Detail */}
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                <Code className="h-5 w-5 text-primary" />
-                Technical Detail
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-lg border border-border bg-muted/50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[#475569]">
-                    <Layers className="h-4 w-4" />
-                    Architecture
+          {/* BUSINESS VISION */}
+          <section className="space-y-4">
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
+              <Target className="h-5 w-5 text-primary" /> Business Vision
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {(["problem", "decision", "impact"] as const).map((key) => (
+                <div
+                  key={key}
+                  className="rounded-lg border border-border bg-muted/30 p-4"
+                >
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground capitalize">
+                    {key === "problem" ? (
+                      <Lightbulb className="h-4 w-4" />
+                    ) : key === "decision" ? (
+                      <Target className="h-4 w-4" />
+                    ) : (
+                      <TrendingUp className="h-4 w-4" />
+                    )}
+                    {key}
                   </div>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {project.technicalDetail.architecture}
-                  </p>
+                  {isEditing ? (
+                    <Textarea
+                      value={form.businessVision[key]}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          businessVision: {
+                            ...form.businessVision,
+                            [key]: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  ) : (
+                    <p className="text-sm leading-relaxed">
+                      {project.businessVision[key]}
+                    </p>
+                  )}
                 </div>
-                <div className="rounded-lg border border-border bg-muted/50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[#475569]">
-                    <Code className="h-4 w-4" />
-                    Stack
+              ))}
+            </div>
+          </section>
+
+          {/* TECHNICAL DETAIL */}
+          <section className="space-y-4">
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
+              <Code className="h-5 w-5 text-primary" /> Technical Detail
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {(["architecture", "stack", "dataFlow"] as const).map((key) => (
+                <div
+                  key={key}
+                  className="rounded-lg border border-border bg-muted/30 p-4"
+                >
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    {key === "architecture" ? (
+                      <Layers className="h-4 w-4" />
+                    ) : key === "stack" ? (
+                      <Code className="h-4 w-4" />
+                    ) : (
+                      <GitBranch className="h-4 w-4" />
+                    )}
+                    <span className="capitalize">
+                      {key.replace(/([A-Z])/g, " $1")}
+                    </span>
                   </div>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {project.technicalDetail.stack}
-                  </p>
+                  {isEditing ? (
+                    <Textarea
+                      value={form.technicalDetail[key]}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          technicalDetail: {
+                            ...form.technicalDetail,
+                            [key]: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  ) : (
+                    <p className="text-sm leading-relaxed">
+                      {project.technicalDetail[key]}
+                    </p>
+                  )}
                 </div>
-                <div className="rounded-lg border border-border bg-muted/50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[#475569]">
-                    <GitBranch className="h-4 w-4" />
-                    Data Flow
-                  </div>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {project.technicalDetail.dataFlow}
-                  </p>
-                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* TECH STACK SELECTOR */}
+          {isEditing && (
+            <section className="pt-6 border-t">
+              <h4 className="text-sm font-semibold mb-4 text-muted-foreground uppercase">
+                Update Technologies
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {allTechnologies.map((tech) => (
+                  <button
+                    key={tech.id}
+                    onClick={() => toggleTech(tech.id)}
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border transition-all ${
+                      form.technologies.includes(tech.id)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground"
+                    }`}
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: tech.color }}
+                    />
+                    {tech.name}
+                  </button>
+                ))}
               </div>
-            </div>
-
-          </div>
+            </section>
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }
