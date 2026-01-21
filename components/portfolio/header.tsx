@@ -22,7 +22,7 @@ export function Header() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="https://github.com"
+              href="https://github.com/DevEnriquegd"
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-[#475569] transition-all duration-150 hover:border-primary hover:text-primary"
@@ -31,20 +31,13 @@ export function Header() {
               <Github className="h-5 w-5" />
             </a>
             <a
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/in/enrique-gonzalez-diaz/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-[#475569] transition-all duration-150 hover:border-primary hover:text-primary"
               aria-label="LinkedIn Profile"
             >
               <Linkedin className="h-5 w-5" />
-            </a>
-            <a
-              href="mailto:contact@example.com"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-[#475569] transition-all duration-150 hover:border-primary hover:text-primary"
-              aria-label="Email Contact"
-            >
-              <Mail className="h-5 w-5" />
             </a>
           </div>
         </div>
