@@ -90,6 +90,11 @@ export default function HomePage() {
     );
   };
 
+  const handleDeleteProject = (id: string) => {
+    setProjectsList((prev) => prev.filter((p) => p.id !== id));
+    setSelectedProject(null);
+  };
+
   const handleToggleTech = (techId: string) => {
     setSelectedTechs((prev) =>
       prev.includes(techId)
@@ -185,6 +190,7 @@ export default function HomePage() {
           handleUpdateProject(updated);
           setSelectedProject(updated);
         }}
+        onDelete={(id) => handleDeleteProject(id)}
       />
       <CreateProjectModal
         isOpen={isCreateModalOpen}

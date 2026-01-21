@@ -13,6 +13,7 @@ import {
   GitBranch,
   Edit,
   Check,
+  Trash,
 } from "lucide-react";
 import type { Project, Technology } from "@/lib/data";
 import {
@@ -26,9 +27,15 @@ interface ProjectModalProps {
   project: Project | null;
   onClose: () => void;
   onSave?: (updated: Project) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function ProjectModal({ project, onClose, onSave }: ProjectModalProps) {
+export function ProjectModal({
+  project,
+  onClose,
+  onSave,
+  onDelete,
+}: ProjectModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<Project | null>(project);
 
@@ -126,6 +133,21 @@ export function ProjectModal({ project, onClose, onSave }: ProjectModalProps) {
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
                 >
                   <Check className="h-4 w-4" /> Save
+                </button>
+                <button
+                  onClick={() => {
+                    if (!form) return;
+                    if (!onDelete) return;
+                    if (
+                      confirm("Delete this project? This cannot be undone.")
+                    ) {
+                      onDelete(form.id);
+                      onClose();
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1 text-sm font-medium text-white"
+                >
+                  <Trash className="h-4 w-4" /> Delete
                 </button>
                 <button
                   onClick={() => {
